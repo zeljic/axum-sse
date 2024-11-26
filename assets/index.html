@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Axum :: Server-sent Events</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="overflow-y-scroll">
+<div id="app" class="max-w-2xl flex flex-col gap-4 rounded mx-auto min-h-[100svh] min-h-64 py-4">
+    <div class="flex flex-col gap-2 border border-slate-300 rounded p-4">
+        <div class="flex flex-row gap-2 items-center">
+            <label for="name" class="text-sm min-w-16">Name</label>
+            <input id="name" type="text" v-model="item.name" class="border px-2 py-1 rounded text-sm grow">
+            <button class="px-3 py-1 rounded text-sm bg-blue-700 text-white" @click.prevent="changeName">Confirm
+            </button>
+        </div>
+
+        <div class="flex flex-row gap-2 items-center min-w-48">
+            <label for="age" class="text-sm min-w-16">Age</label>
+            <input id="age" type="number" v-model="item.age" class="border px-2 py-1 rounded text-sm grow">
+            <button class="px-3 py-1 rounded text-sm bg-blue-700 text-white" @click.prevent="changeAge">Confirm</button>
+        </div>
+    </div>
+
+    <div class="flex flex-col gap-1 border border-slate-300 rounded p-4 min-w-64 h-full grow">
+        <h2>Logs</h2>
+        <div v-for="log in logs" class="flex flex-row gap-3">
+            <span class="text-xs text-gray-500 min-w-32">{{ log.kind }}</span>
+            <span class="text-xs">{{ log.value }}</span>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import {createApp, ref} from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+
+    const app = createApp({
+        setup() {
+            const evtSource = new EventSource("/sse");
+
+            evtSource.onopen = function () {
+                console.log("Connection to server opened.");
+            };
+
+            evtSource.onmessage = function (event) {
+                let json = JSON.parse(event.data);
+
+                logs.value.push({kind: json.kind, value: json.value});
+            };
+
+            const item = ref({
+                name: '',
+                age: 0
+            });
+            const logs = ref([]);
+
+            const changeName = async () => await fetch(`/name/${item.value.name}`)
+            const changeAge = async () => await fetch(`/age/${item.value.age}`)
+
+            return {
+                item,
+                changeName,
+                changeAge,
+                logs
+            }
+        }
+    });
+
+    app.mount('#app');
+</script>
+</body>
+</html>
