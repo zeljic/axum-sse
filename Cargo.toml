@@ -1,0 +1,22 @@
+[package]
+name = "axum-sse"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies.axum]
+version = "0.7"
+default-features = false
+features = ["tokio", "http1", "json"]
+
+[dependencies.tokio]
+version = "1"
+default-features = false
+features = ["macros", "rt-multi-thread", "net"]
+
+[dependencies.serde]
+version = "1"
+default-features = false
+features = ["derive"]
+
+[dependencies.serde_json]
+version = "1"
